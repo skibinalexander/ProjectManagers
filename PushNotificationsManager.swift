@@ -8,6 +8,7 @@
 
 import Foundation
 import UserNotifications
+import Firebase
 
 class PushNotificationsManager: NSObject {
     
