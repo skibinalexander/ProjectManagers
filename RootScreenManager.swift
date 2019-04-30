@@ -17,7 +17,7 @@ enum RootScreenManagerType {
 class RootScreenManager {
     
     static func rootType() -> RootScreenManagerType {
-        return .onStart
+        return .onMain
     }
     
 }
