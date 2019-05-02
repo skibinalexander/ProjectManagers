@@ -16,8 +16,14 @@ enum RootScreenManagerType {
 
 class RootScreenManager {
     
-    static func rootType() -> RootScreenManagerType {
-        return .onMain
+    static func rootType(isOnBoard: Bool, isAuth: Bool) -> RootScreenManagerType {
+        if isOnBoard {
+            return .onBoard
+        } else if !isAuth {
+            return .onStart
+        } else {
+            return .onMain
+        }
     }
     
 }
