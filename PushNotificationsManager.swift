@@ -10,6 +10,9 @@ import Foundation
 import UserNotifications
 import Firebase
 
+public let PNMRegistrationAllNotifictionName: Notification.Name = Notification.Name(rawValue: "PNMRegistrationAllNotifactionName")
+public let PNMRegistrationFCMNotifictionName: Notification.Name = Notification.Name(rawValue: "PNMRegistrationFCMNotifactionName")
+
 class PushNotificationsManager: NSObject {
     
     static var tokenAPNS:   String?
@@ -58,8 +61,24 @@ extension PushNotificationsManager: UNUserNotificationCenterDelegate {
         
         let apns = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         
+        print("APNS = \(apns)")
+        print("FCM = \(fcm)")
+        
         PushNotificationsManager.tokenAPNS  = apns
         PushNotificationsManager.tokenFCM   = fcm
+        
+        NotificationCenter.default.post(name: PNMRegistrationAllNotifictionName, object: nil, userInfo: nil)
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        print(userInfo)
+        completionHandler()
+        
     }
     
 }
@@ -70,6 +89,8 @@ extension PushNotificationsManager: MessagingDelegate {
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
         print("Firebase registration token: \(fcmToken)")
+        PushNotificationsManager.tokenFCM = fcmToken
+        NotificationCenter.default.post(name: PNMRegistrationFCMNotifictionName, object: nil, userInfo: nil)
     }
     
     func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
