@@ -10,6 +10,8 @@ import Foundation
 import UserNotifications
 import Firebase
 
+public let FBRegistrationTokenNotification = Notification.Name("PushNotificationsManagerdidReceiveRegistrationToken")
+
 class PushNotificationsManager: NSObject {
     
     static var tokenAPNS:   String?
@@ -70,6 +72,9 @@ extension PushNotificationsManager: MessagingDelegate {
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
         print("Firebase registration token: \(fcmToken)")
+        NotificationCenter.default.post(name: FBRegistrationTokenNotification,
+                                        object: nil,
+                                        userInfo: ["token":fcmToken])
     }
     
     func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
