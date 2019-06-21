@@ -10,7 +10,10 @@ import Foundation
 import UserNotifications
 import Firebase
 
-public let FBRegistrationTokenNotification = Notification.Name("PushNotificationsManagerdidReceiveRegistrationToken")
+public let PNMRegistrationAllNotifictionName: Notification.Name = Notification.Name(rawValue: "PNMRegistrationAllNotifactionName")
+public let PNMRegistrationFCMNotifictionName: Notification.Name = Notification.Name(rawValue: "PNMRegistrationFCMNotifactionName")
+
+private let gcmMessageIDKey = "gcm.message_id"
 
 class PushNotificationsManager: NSObject {
     
@@ -19,7 +22,7 @@ class PushNotificationsManager: NSObject {
     
     static let manager: PushNotificationsManager = PushNotificationsManager()
     
-    func registerForPushNotifications() {
+    func registerForPushNotifications(delegate: UNUserNotificationCenterDelegate) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
             guard self != nil else { return }
             
@@ -27,7 +30,7 @@ class PushNotificationsManager: NSObject {
             
             guard granted else { return }
             
-            UNUserNotificationCenter.current().delegate = self
+            UNUserNotificationCenter.current().delegate = delegate
             Messaging.messaging().delegate = self
             
             self?.getNotificationSettings()
@@ -48,7 +51,7 @@ class PushNotificationsManager: NSObject {
 
 //  MARK: UNUserNotificationCenterDelegate
 
-extension PushNotificationsManager: UNUserNotificationCenterDelegate {
+extension PushNotificationsManager {
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
@@ -60,8 +63,17 @@ extension PushNotificationsManager: UNUserNotificationCenterDelegate {
         
         let apns = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         
+        print("APNS = \(apns)")
+        print("FCM = \(fcm)")
+        
         PushNotificationsManager.tokenAPNS  = apns
         PushNotificationsManager.tokenFCM   = fcm
+        
+        NotificationCenter.default.post(name: PNMRegistrationAllNotifictionName, object: nil, userInfo: nil)
+    }
+    
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        
     }
     
 }
@@ -72,9 +84,8 @@ extension PushNotificationsManager: MessagingDelegate {
     
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
         print("Firebase registration token: \(fcmToken)")
-        NotificationCenter.default.post(name: FBRegistrationTokenNotification,
-                                        object: nil,
-                                        userInfo: ["token":fcmToken])
+        PushNotificationsManager.tokenFCM = fcmToken
+        NotificationCenter.default.post(name: PNMRegistrationFCMNotifictionName, object: nil, userInfo: nil)
     }
     
     func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
