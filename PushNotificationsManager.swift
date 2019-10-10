@@ -81,7 +81,6 @@ extension PushNotificationsManager {
 //  MARK: PushNotificationsManager + FirebaseMessaging
 
 extension PushNotificationsManager: MessagingDelegate {
-    
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
         print("Firebase registration token: \(fcmToken)")
         PushNotificationsManager.tokenFCM = fcmToken
@@ -91,5 +90,4 @@ extension PushNotificationsManager: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceive remoteMessage: MessagingRemoteMessage) {
         print("Received data message: \(remoteMessage.appData)")
     }
-    
 }
